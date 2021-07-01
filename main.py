@@ -4,6 +4,7 @@ from tifffile import imread
 from PIL import Image
 import os
 from tqdm import tqdm
+from math import cos, radians
 
 # define pixel per degree
 resolution = 592.747
@@ -52,7 +53,7 @@ def slice_image(im_name):
             for lat_crater, lon_crater, w, h in zip(craters['LATITUDE_ELLIPSE_IMAGE'], craters['LONGITUDE_ELLIPSE_IMAGE'], craters['DIAM_ELLIPSE_MAJOR_IMAGE'], craters['DIAM_ELLIPSE_MINOR_IMAGE']):
                 x_ = lon_crater - lon
                 y_ = lat - lat_crater
-                w = w * 10 / round_resolution
+                w = w * 10 / round_resolution / cos(radians(lat))
                 h = h * 10 / round_resolution
                 f.write('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
             f.close()
