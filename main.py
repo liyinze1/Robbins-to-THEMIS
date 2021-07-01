@@ -58,11 +58,15 @@ def slice_image(im_name):
             f.close()
 
 def get_lat_lon_base(file_name):
-    code = file_name.split('_')[-2]
-    lat = int(code[0 : 2])
-    if code[2] == 'S':
-        lat = -lat
-    lon = int(code[3 : -1])
+    latlon = file_name.split('_')[-2]
+    if 'N' in latlon:
+        code = latlon.split('N')
+        lat = int(code[0])
+        lon = int(code[1][:-1])
+    else:
+        code = latlon.split('S')
+        lat = -int(code[0])
+        lon = int(code[1][:-1])
     if lon >= 180:
         lon -= 360
     return lat, lon
