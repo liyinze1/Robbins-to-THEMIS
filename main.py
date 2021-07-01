@@ -9,7 +9,7 @@ from math import cos, radians
 # define pixel per degree
 resolution = 592.747
 round_resolution = round(resolution)
-data = pd.read_csv('RobbinsCraters_tab.csv')
+data = pd.read_csv('Robbins_essential.csv')
 lat_data = data['LATITUDE_CIRCLE_IMAGE']
 lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 
