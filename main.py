@@ -115,3 +115,4 @@ if __name__ == '__main__':
     raw_ims = os.listdir(raw_folder_path)
     for im_name in raw_ims:
         slice_image(raw_folder_path + im_name)
+        os.system('rm -f %s'%(raw_folder_path + im_name))
