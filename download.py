@@ -1,5 +1,11 @@
 import os
 os.system('mkdir raw_images/')
+os.system('mkdir dataset/')
+os.system('mkdir dataset/images/')
+os.system('mkdir dataset/labels/')
+os.system('mkdir valid/')
+os.system('mkdir valid/images/')
+os.system('mkdir valid/labels/')
 os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Eridania_DayIR_30Sept2017/THEMIS_DayIR_ControlledMosaic_Eridania_65S120E_100mpp.tif')
 os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Thaumasia_DayIR_30Sept2017/THEMIS_DayIR_ControlledMosaic_Thaumasia_65S240E_100mpp.tif')
 os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Phaethontis_DayIR_30Sept2017/THEMIS_DayIR_ControlledMosaic_Phaethontis_65S180E_100mpp.tif')
@@ -28,6 +34,3 @@ os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS
 os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/SyrtisMajor_DayIR_31July2014/THEMIS_DayIR_ControlledMosaic_SyrtisMajor_00N45E_100mpp.tif')
 os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Iapygia_DayIR_31July2014/THEMIS_DayIR_ControlledMosaic_Iapygia_30S45E_100mpp.tif')
 os.system('wget -P raw_images/ https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Elysium_DayIR_31July2014/THEMIS_DayIR_ControlledMosaic_Elysium_00N135E_100mpp.tif')
-os.system('mkdir crater_dataset/')
-os.system('mkdir crater_dataset/images/')
-os.system('mkdir crater_dataset/labels/')

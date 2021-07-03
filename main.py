@@ -13,8 +13,11 @@ data = pd.read_csv('Robbins_essential.csv')
 lat_data = data['LATITUDE_CIRCLE_IMAGE']
 lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 
-image_folder_path = 'crater_dataset/images/'
-label_folder_path = 'crater_dataset/labels/'
+image_folder_path = 'dataset/images/'
+label_folder_path = 'dataset/labels/'
+
+inbox_threshold = 0.7
+outbox_threshold = 1 - inbox_threshold
 
 def slice_image(im_name):
     # read image to a ndarray
@@ -45,18 +48,53 @@ def slice_image(im_name):
             lon = lon_base + j
             file_name = str(lat) + '_' + str(lon)
             pillow_im = Image.fromarray(im[round(x) : round(x) + round_resolution, round(y) : round(y) + round_resolution])
-            pillow_im.save(image_folder_path + file_name + '.png', 'PNG')
             
             # label
-            f = open(label_folder_path + file_name + '.txt', 'w')
             craters = data[(lat_data <= lat) & (lat_data > lat - 1) & (lon_data >= lon) & (lon_data < lon + 1)]
+            buffer = ''
             for lat_crater, lon_crater, w, h in zip(craters['LATITUDE_ELLIPSE_IMAGE'], craters['LONGITUDE_ELLIPSE_IMAGE'], craters['DIAM_ELLIPSE_MAJOR_IMAGE'], craters['DIAM_ELLIPSE_MINOR_IMAGE']):
                 x_ = lon_crater - lon
                 y_ = lat - lat_crater
                 w = w * 10 / round_resolution / cos(radians(lat))
                 h = h * 10 / round_resolution
-                f.write('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
-            f.close()
+
+                left = x_ - w / 2
+                left_inbox = left >= 0
+
+                right = x_ + w / 2
+                right_inbox = right <= 1
+
+                up = y_ + h / 2
+                up_inbox = up <= 1
+
+                down = y_ - h / 2
+                down_inbox = down >= 0
+                
+                # if whole or part of the crater in the image
+                if left_inbox and right_inbox and up_inbox and down_inbox:
+                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
+                elif ((0 - left) / w <= outbox_threshold) and right_inbox and up_inbox and down_inbox:
+                    w = right - 0
+                    x_ = (0 + right) / 2
+                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
+                elif left_inbox and ((right - 1) / w <= outbox_threshold) and up_inbox and down_inbox:
+                    w = 1 - left
+                    x_ = (left + 1) / 2
+                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
+                elif left_inbox and right_inbox and ((up - 1) / h <= outbox_threshold) and down_inbox:
+                    h = 1 - down
+                    y_ = (down + 1) / 2
+                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
+                elif left_inbox and right_inbox and up_inbox and ((0 - down) / h <= outbox_threshold):
+                    h = up - 0
+                    y_ = (0 + up) / 2
+                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
+            
+            if len(buffer) > 0:
+                pillow_im.save(image_folder_path + file_name + '.png', 'PNG')
+                f = open(label_folder_path + file_name + '.txt', 'w')
+                f.write(buffer)
+                f.close()
 
 def get_lat_lon_base(file_name):
     latlon = file_name.split('_')[-2]
