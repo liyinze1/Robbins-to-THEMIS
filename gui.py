@@ -3,9 +3,13 @@ import os
 import random
 import threading
 import time
+import platform
 
 # define file path
-dataset_path = 'dataset/'
+if platform.system().lower() == 'windows':
+    dataset_path = 'dataset\\'
+else:
+    dataset_path = 'dataset/'
 
 # create dir
 os.system('mkdir ' + dataset_path + 'revised_labels/')
