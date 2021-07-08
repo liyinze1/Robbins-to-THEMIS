@@ -135,10 +135,12 @@ def show_next():
     selected_box_idx = -1
 
     # read labels
-    label_file = open(dataset_path + 'labels/' + img_name + '.txt', 'r')
-    label_list = [[float(item) for item in line.split(' ')] for i, line in enumerate(label_file.read().splitlines())]
-    label_file.close()
-
+    try:
+        label_file = open(dataset_path + 'labels/' + img_name + '.txt', 'r')
+        label_list = [[float(item) for item in line.split(' ')] for i, line in enumerate(label_file.read().splitlines())]
+        label_file.close()
+    except:
+        label_list = []
     # delete radiobuttons of last image
     radio_idx = tk.StringVar()
     for radio_button in radio_list:
