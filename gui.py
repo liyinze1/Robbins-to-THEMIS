@@ -1,8 +1,8 @@
 import tkinter as tk
 import os
 import random
-
-from PIL.Image import alpha_composite
+import threading
+import time
 
 # define file path
 dataset_path = 'dataset/'
@@ -12,6 +12,7 @@ os.system('mkdir ' + dataset_path + '/revised_labels/')
 
 # read images
 img_names = [name[:-4] for name in os.listdir(dataset_path + '/images/')]
+# remove done work from to-do list
 done_work_names = set([name[:-4] for name in os.listdir(dataset_path + '/revised_labels/')])
 img_names = [name for name in img_names if name not in done_work_names]
 
@@ -29,7 +30,6 @@ small_move = 1
 
 font = ('Courier', 15)
 
-
 # create window
 window = tk.Tk()
 window.title('Let\'s correct lables!')
@@ -46,7 +46,7 @@ img_frame.pack(side='left')
 name_label = tk.Label(img_frame, font=font, width=15)
 name_label.pack()
 
-canvas = tk.Canvas(img_frame, bg='lightgray', height=593, width=593)
+canvas = tk.Canvas(img_frame, bg='lightgray', height=resolution, width=resolution, borderwidth=0, highlightthickness=0)
 canvas.pack()
 
 
@@ -58,20 +58,38 @@ def radio_select():
     global selected_box_idx
     global radio_idx
     selected_box_idx = int(radio_idx.get())
+    flash_selected_rect()
 
 # colors
 def get_random_color():
     global color_list
-    R = ('%02x'%random.randint(0,255))
-    G = ('%02x'%random.randint(0,255))
-    B = ('%02x'%random.randint(0,255))
-    color = '#' + R + G + B
+    R = G = B = 0
+    # avoid gray color
+    while max(R, G, B) - min(R, G, B) < 50:
+        R = random.randint(0,255)
+        G = random.randint(0,255)
+        B = random.randint(0,255)
+    color = '#' + '%02x'%R + '%02x'%G + '%02x'%B
     color_list.append(color)
     return color
+
+# flash the selected box
+def flash_thread():
+    rect = rect_list[selected_box_idx]
+    color = color_list[selected_box_idx]
+    for i in range(2):
+        time.sleep(0.1)
+        canvas.itemconfig(rect, outline='#FFFFFF')
+        time.sleep(0.1)
+        canvas.itemconfig(rect, outline=color)
+def flash_selected_rect():
+    threading.Thread(target=flash_thread).start()
 
 # save boxes to txt file
 def save_labels():
     # save last image and label to 'revised_data/'
+    if img_idx < 0:
+        return
     global rect_list
     buffer = ''
     for rect in rect_list:
@@ -85,6 +103,7 @@ def save_labels():
     f = open(dataset_path + '/revised_labels/' + img_names[img_idx] + '.txt', 'w')
     f.write(buffer)
     f.close()
+    print('label: ' + img_names[img_idx] + '.txt has been saved')
 
 img_idx = -1
 # show next image
@@ -151,8 +170,8 @@ def show_next():
 list_frame = tk.Frame(window, padx=10, pady=10)
 list_frame.pack(side='left')
 
-hint = 'Click 🖱️ to select box\n' + \
-       'Press Shift and drag to create a new box\n' + \
+hint = 'Click MouseLeft to select box\n' + \
+       'Hold Shift+MouseLeft or MouseRight\nto draw a new box\n' + \
        'Press BackSpace to delete selected box\n' + \
        'Press Space to select next box\n' + \
        'Press w, a, s, d to move %d pixel\n'%small_move + \
@@ -207,7 +226,7 @@ def keypress(event):
         elif key == 'Right': x1 = min(x1 + 1, resolution)
         canvas.coords(rect, x0, y0, x1, y1)
     elif key == 'Return':
-        # save_labels()
+        save_labels()
         show_next()
     elif key == 'Escape':
         global img_idx
@@ -218,6 +237,7 @@ def keypress(event):
         selected_box_idx += 1
         selected_box_idx %= len(rect_list)
         radio_list[selected_box_idx].select()
+        flash_selected_rect()
     elif key == 'BackSpace':
         print('here')
         # delete rectangle
@@ -246,6 +266,7 @@ def select_box_by_mouse(event):
     if event.widget == canvas:
         x = event.x
         y = event.y
+        print(x, y)
         global selected_box_idx
         candidate = -1
         candidate_area = resolution * resolution
@@ -261,6 +282,7 @@ def select_box_by_mouse(event):
         else:
             selected_box_idx = candidate
             radio_list[selected_box_idx].select()
+            flash_selected_rect()
 window.bind('<Button-1>', select_box_by_mouse)
 
 
@@ -277,7 +299,7 @@ def on_click(event):
         y_start = max(min(resolution, event.y), 0)
         # create rectangle
         color = get_random_color()
-        rect = canvas.create_rectangle(x_start, y_start, 1, 1, outline=color)
+        rect = canvas.create_rectangle(x_start, y_start, x_start, y_start, outline=color)
         # index
         i = len(rect_list)
         selected_box_idx = i
