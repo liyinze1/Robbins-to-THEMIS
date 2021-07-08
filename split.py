@@ -14,7 +14,7 @@ if platform.system().lower() == 'windows':
     for name in names[: valid_size]:
         os.system('move "dataset/images\\%s.png" "valid/images/"' % name)
         os.system('move "dataset/labels\\%s.txt" "valid/labels/"' % name)
-elif platform.system().lower() == 'linux':
+else:
     os.system('mv "valid/images/*.*" "dataset/images/"')
     os.system('mv "valid/labels/*.*" "dataset/labels/"')
     for name in names[: valid_size]:
