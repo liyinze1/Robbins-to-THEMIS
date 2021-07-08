@@ -8,12 +8,12 @@ import time
 dataset_path = 'dataset/'
 
 # create dir
-os.system('mkdir ' + dataset_path + '/revised_labels/')
+os.system('mkdir ' + dataset_path + 'revised_labels/')
 
 # read images
-img_names = [name[:-4] for name in os.listdir(dataset_path + '/images/')]
+img_names = [name[:-4] for name in os.listdir(dataset_path + 'images/')]
 # remove done work from to-do list
-done_work_names = set([name[:-4] for name in os.listdir(dataset_path + '/revised_labels/')])
+done_work_names = set([name[:-4] for name in os.listdir(dataset_path + 'revised_labels/')])
 img_names = [name for name in img_names if name not in done_work_names]
 
 resolution = 593
@@ -100,7 +100,7 @@ def save_labels():
         h = (y1 - y0) / resolution
         buffer += ' '.join(['0', str(x), str(y), str(w), str(h)])
         buffer += '\n'
-    f = open(dataset_path + '/revised_labels/' + img_names[img_idx] + '.txt', 'w')
+    f = open(dataset_path + 'revised_labels/' + img_names[img_idx] + '.txt', 'w')
     f.write(buffer)
     f.close()
     print('label: ' + img_names[img_idx] + '.txt has been saved')
