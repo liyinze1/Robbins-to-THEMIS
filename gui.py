@@ -12,12 +12,12 @@ else:
     dataset_path = 'dataset/'
 
 # create dir
-os.system('mkdir ' + dataset_path + 'revised_labels/')
+os.system('mkdir ' + dataset_path + 'revised_labels')
 
 # read images
-img_names = [name[:-4] for name in os.listdir(dataset_path + 'images/')]
+img_names = [name[:-4] for name in os.listdir(dataset_path + 'images')]
 # remove done work from to-do list
-done_work_names = set([name[:-4] for name in os.listdir(dataset_path + 'revised_labels/')])
+done_work_names = set([name[:-4] for name in os.listdir(dataset_path + 'revised_labels')])
 img_names = [name for name in img_names if name not in done_work_names]
 
 resolution = 593
@@ -37,14 +37,13 @@ font = ('Courier', 15)
 # create window
 window = tk.Tk()
 window.title('Let\'s correct lables!')
-window.geometry('1000x650')
 
 
 '''
     code for canvas on the left
 '''
 # create a frame for image on the left
-img_frame = tk.Frame(window, padx=10)
+img_frame = tk.Frame(window, padx=10, pady=10)
 img_frame.pack(side='left')
 
 name_label = tk.Label(img_frame, font=font, width=15)
@@ -176,7 +175,8 @@ def show_next():
 list_frame = tk.Frame(window, padx=10, pady=10)
 list_frame.pack(side='left')
 
-hint = 'Click MouseLeft to select box\n' + \
+hint = 'Click MouseLeft to select a box\n' + \
+       'Hold MouseLeft to drag a box\n' + \
        'Hold Shift+MouseLeft or MouseRight\nto draw a new box\n' + \
        'Press BackSpace to delete selected box\n' + \
        'Press Space to select next box\n' + \
@@ -267,11 +267,15 @@ def keypress(event):
         print('select box coords: ', canvas.coords(rect_list[selected_box_idx]))
 window.bind('<Key>', keypress)
 
-# action for mouse click
+# click left mouse to select
 def select_box_by_mouse(event):
     if event.widget == canvas:
+        global x_move_from
+        global y_move_from
         x = event.x
         y = event.y
+        x_move_from = x
+        y_move_from = y
         print(x, y)
         global selected_box_idx
         candidate = -1
@@ -291,10 +295,22 @@ def select_box_by_mouse(event):
             flash_selected_rect()
 window.bind('<Button-1>', select_box_by_mouse)
 
+# drag and move a box
+def on_drag(event):
+    if event.widget == canvas and selected_box_idx >= 0:
+        rect = rect_list[selected_box_idx]
+        x0, y0, x1, y1 = canvas.coords(rect)
+        w = x1 - x0
+        h = y1 - y0
+        x = max(min(event.x, resolution), w)
+        y = max(min(event.y, resolution), h)
+        canvas.coords(rect, x - w, y - h, x, y)
+window.bind('<B1-Motion>', on_drag)
+
 
 x_start = 0
 y_start = 0
-# action for drag and drop
+# click right to mouse to create a box
 def on_click(event):
     if event.widget == canvas:
         global x_start
@@ -315,7 +331,6 @@ def on_click(event):
         radio_button.pack()
         radio_list.append(radio_button)
         radio_button.select()
-
 window.bind('<Shift-Button-1>', on_click)
 window.bind('<Button-3>', on_click)
 
