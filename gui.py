@@ -184,7 +184,7 @@ hint = 'Click MouseLeft to select a box\n' + \
        'Press W, A, S, D to move %d pixel\n'%big_move + \
        'Press ↔️ or ↕️ to adjust box\n' + \
        'Press Enter to save and show next image\n' + \
-       'Press Esc to go back to last image\n'
+       'Press [ or ] to go to last or next image without save\n'
 hint_label = tk.Label(list_frame, text=hint, font=font)
 hint_label.pack()
 
@@ -192,6 +192,7 @@ radio_frame = tk.Frame(list_frame)
 radio_frame.pack()
 radio_idx = tk.StringVar()
 
+show_next()
 
 '''
     code for mouse and keyboard actions
@@ -234,11 +235,13 @@ def keypress(event):
     elif key == 'Return':
         save_labels()
         show_next()
-    elif key == 'Escape':
+    elif key == 'bracketleft':
         global img_idx
         if img_idx > 0:
             img_idx -= 2
             show_next()
+    elif key == 'bracketright':
+        show_next()
     elif key == 'space':
         selected_box_idx += 1
         selected_box_idx %= len(rect_list)
