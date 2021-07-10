@@ -34,6 +34,8 @@ small_move = 1
 
 font = ('Courier', 15)
 
+rows_per_col = 10
+
 # create window
 window = tk.Tk()
 window.title('Let\'s correct lables!')
@@ -120,6 +122,7 @@ def show_next():
     global img_file
     global selected_box_idx
     global color_list
+    global radio_frame
 
     img_idx += 1
     if img_idx == len(img_names):
@@ -142,12 +145,14 @@ def show_next():
         label_file = open(dataset_path + 'labels/' + img_name + '.txt', 'r')
         label_list = [[float(item) for item in line.split(' ')] for i, line in enumerate(label_file.read().splitlines())]
         label_file.close()
+        # sort boxes, from top to bottom
+        label_list.sort(key=(lambda label : label[2]))
     except:
         label_list = []
     # delete radiobuttons of last image
     radio_idx = tk.StringVar()
     for radio_button in radio_list:
-        radio_button.forget()
+        radio_button.destroy()
     radio_list = []
     rect_list = []
 
@@ -168,7 +173,8 @@ def show_next():
         rect_list.append(rect)
         # create radio buttons
         radio_button = tk.Radiobutton(radio_frame, text='Box ' + str(i), variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=8)
-        radio_button.pack()
+        # radio_button.pack()
+        radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
         radio_list.append(radio_button)
         
 # create a image for labels and buttons on the right
@@ -257,12 +263,13 @@ def keypress(event):
         del(color_list[selected_box_idx])
         # delete radio button
         for radio in radio_list:
-            radio.forget()
+            radio.destroy()
         radio_list = []
         radio_idx.set('')
         for i, rect in enumerate(rect_list):
             radio_button = tk.Radiobutton(radio_frame, text='Box ' + str(i), variable=radio_idx, value=i, command=radio_select, font=font, bg=color_list[i], width=8)
-            radio_button.pack()
+            # radio_button.pack(
+            radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
             radio_list.append(radio_button)
         selected_box_idx = -1
     elif key == 'p':
@@ -331,7 +338,8 @@ def on_click(event):
         rect_list.append(rect)
         # create new radio button
         radio_button = tk.Radiobutton(radio_frame, text='Box ' + str(i), variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=8)
-        radio_button.pack()
+        # radio_button.pack()
+        radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
         radio_list.append(radio_button)
         radio_button.select()
 window.bind('<Shift-Button-1>', on_click)
