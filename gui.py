@@ -122,7 +122,6 @@ def show_next():
     global img_file
     global selected_box_idx
     global color_list
-    global radio_frame
 
     img_idx += 1
     if img_idx == len(img_names):
