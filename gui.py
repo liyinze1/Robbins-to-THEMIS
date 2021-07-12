@@ -183,17 +183,17 @@ def show_next():
 list_frame = tk.Frame(window, padx=10, pady=10)
 list_frame.pack(side='left')
 
-hint = 'Click MouseLeft to select a box\n' + \
-       'Hold MouseLeft to drag a box\n' + \
-       'Hold Shift+MouseLeft or MouseRight\nto draw a new box\n' + \
-       'Press BackSpace to delete selected box\n' + \
-       'Press Space to select next box\n' + \
-       'Press w, a, s, d to move %d pixel\n'%small_move + \
-       'Press W, A, S, D to move %d pixel\n'%big_move + \
-       'Press ↔️ or ↕️ to adjust box\n' + \
-       'Press Enter to save and show next image\n' + \
-       'Press [ or ] to go to last or next image without save\n' + \
-       'Press Esc to delete this image from dataset\n'
+hint = \
+        '1. Select a box: click box or press space\t\n' + \
+        '2. Move a box: leftmouse drag and drop or\t\n' + \
+        'press w, a, s, d to move %d pixel\n'%small_move + \
+        'press W, A, S, D to move %d pixel\n'%big_move + \
+        '3. Adjust a box: press ⬆️⬇️⬅️➡️\t\t\t\n' + \
+        '4. Create a box: shift+leftmouse or rightmouse\t\n' + \
+        '5. Delete a box: press backspace or delete\t\n' + \
+        '6. Save and show next image: return or enter\t\n' + \
+        '7. Last or next image without save: [ or ]\t\n' + \
+        '8. Delete this image from dataset: esc\t\t\n'
 hint_label = tk.Label(list_frame, text=hint, font=font)
 hint_label.pack()
 
@@ -256,8 +256,9 @@ def keypress(event):
         selected_box_idx %= len(rect_list)
         radio_list[selected_box_idx].select()
         flash_selected_rect()
-    elif key == 'BackSpace':
-        print('here')
+    elif key in ('BackSpace', 'Delete'):
+        if selected_box_idx == -1:
+            return
         # delete rectangle
         rect = rect_list[selected_box_idx]
         canvas.delete(rect)
@@ -277,6 +278,7 @@ def keypress(event):
         selected_box_idx = -1
     elif key == 'Escape':
         os.system(mv_cmd + ' ' + dataset_path + 'images/' + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
+        print('move ' + img_names[img_idx] + ' to /deleted_images/')
         show_next()
     elif key == 'p':
         print(selected_box_idx)
