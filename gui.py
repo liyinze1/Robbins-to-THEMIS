@@ -8,11 +8,14 @@ import platform
 # define file path
 if platform.system().lower() == 'windows':
     dataset_path = 'dataset\\'
+    mv_cmd = 'move'
 else:
     dataset_path = 'dataset/'
+    mv_cmd = 'mv'
 
 # create dir
 os.system('mkdir ' + dataset_path + 'revised_labels')
+os.system('mkdir ' + dataset_path + 'deleted_images')
 
 # read images
 img_names = [name[:-4] for name in os.listdir(dataset_path + 'images')]
@@ -189,7 +192,8 @@ hint = 'Click MouseLeft to select a box\n' + \
        'Press W, A, S, D to move %d pixel\n'%big_move + \
        'Press ↔️ or ↕️ to adjust box\n' + \
        'Press Enter to save and show next image\n' + \
-       'Press [ or ] to go to last or next image without save\n'
+       'Press [ or ] to go to last or next image without save\n' + \
+       'Press Esc to delete this image from dataset\n'
 hint_label = tk.Label(list_frame, text=hint, font=font)
 hint_label.pack()
 
@@ -271,6 +275,9 @@ def keypress(event):
             radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
             radio_list.append(radio_button)
         selected_box_idx = -1
+    elif key == 'Escape':
+        os.system(mv_cmd + ' ' + dataset_path + 'images/' + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
+        show_next()
     elif key == 'p':
         print(selected_box_idx)
         print('select box coords: ', canvas.coords(rect_list[selected_box_idx]))
