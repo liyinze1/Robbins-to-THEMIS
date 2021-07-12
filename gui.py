@@ -74,9 +74,9 @@ def get_random_color():
     R = G = B = 0
     # avoid gray color
     while max(R, G, B) - min(R, G, B) < 50:
-        R = random.randint(0,255)
-        G = random.randint(0,255)
-        B = random.randint(0,255)
+        R = random.randint(20,255)
+        G = random.randint(20,255)
+        B = random.randint(20,255)
     color = '#' + '%02x'%R + '%02x'%G + '%02x'%B
     color_list.append(color)
     return color
