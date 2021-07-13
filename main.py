@@ -16,8 +16,7 @@ lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 image_folder_path = 'dataset/images/'
 label_folder_path = 'dataset/labels/'
 
-inbox_threshold = 0.7
-outbox_threshold = 1 - inbox_threshold
+inbox_threshold = 0.5
 
 def slice_image(im_name):
     # read image to a ndarray
@@ -52,43 +51,25 @@ def slice_image(im_name):
             # label
             craters = data[(lat_data <= lat) & (lat_data > lat - 1) & (lon_data >= lon) & (lon_data < lon + 1)]
             buffer = ''
-            for lat_crater, lon_crater, w, h in zip(craters['LATITUDE_ELLIPSE_IMAGE'], craters['LONGITUDE_ELLIPSE_IMAGE'], craters['DIAM_ELLIPSE_MAJOR_IMAGE'], craters['DIAM_ELLIPSE_MINOR_IMAGE']):
+            for lat_crater, lon_crater, w, h, id in zip(craters['LATITUDE_ELLIPSE_IMAGE'], craters['LONGITUDE_ELLIPSE_IMAGE'], craters['DIAM_ELLIPSE_MAJOR_IMAGE'], craters['DIAM_ELLIPSE_MINOR_IMAGE'], craters['CRATER_ID']):
                 x_ = lon_crater - lon
                 y_ = lat - lat_crater
                 w = w * 10 / round_resolution / cos(radians(lat))
                 h = h * 10 / round_resolution
 
-                left = x_ - w / 2
-                left_inbox = left >= 0
+                x0, y0 = max(0, x_ - w / 2), max(0, y_ - h / 2)
+                x1, y1 = min(1, x_ + w / 2), min(1, y_ + h / 2)
 
-                right = x_ + w / 2
-                right_inbox = right <= 1
+                area = w * h
+                area_inbox = (x1 - x0) * (y1 - y0)
 
-                up = y_ + h / 2
-                up_inbox = up <= 1
-
-                down = y_ - h / 2
-                down_inbox = down >= 0
+                if area_inbox / area > inbox_threshold:
+                    x_ = (x0 + x1) / 2
+                    y_ = (y0 + y1) / 2
+                    w = x1 - x0
+                    h = y1 - y0
+                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + ' ' + id + '\n')
                 
-                # if whole or part of the crater in the image
-                if left_inbox and right_inbox and up_inbox and down_inbox:
-                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
-                elif ((0 - left) / w <= outbox_threshold) and right_inbox and up_inbox and down_inbox:
-                    w = right - 0
-                    x_ = (0 + right) / 2
-                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
-                elif left_inbox and ((right - 1) / w <= outbox_threshold) and up_inbox and down_inbox:
-                    w = 1 - left
-                    x_ = (left + 1) / 2
-                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
-                elif left_inbox and right_inbox and ((up - 1) / h <= outbox_threshold) and down_inbox:
-                    h = 1 - down
-                    y_ = (down + 1) / 2
-                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
-                elif left_inbox and right_inbox and up_inbox and ((0 - down) / h <= outbox_threshold):
-                    h = up - 0
-                    y_ = (0 + up) / 2
-                    buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + '\n')
             
             if len(buffer) > 0:
                 pillow_im.save(image_folder_path + file_name + '.png', 'PNG')

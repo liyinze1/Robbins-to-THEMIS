@@ -5,6 +5,8 @@ import threading
 import time
 import platform
 
+crater_id_to_file = True
+
 # define file path
 if platform.system().lower() == 'windows':
     dataset_path = 'dataset\\'
@@ -27,6 +29,7 @@ resolution = 593
 color_list = []
 rect_list = []
 radio_list = []
+crater_ids = []
 selected_box_idx = 0
 
 move_keyset = {'w', 'a', 's', 'd', 'W', 'A', 'S', 'D'}
@@ -99,14 +102,19 @@ def save_labels():
     if img_idx < 0:
         return
     global rect_list
+    global crater_ids
     buffer = ''
-    for rect in rect_list:
+    for i, rect in enumerate(rect_list):
         x0, y0, x1, y1 = canvas.coords(rect)
         x = (x0 + x1) / 2 / resolution
         y = (y0 + y1) / 2 / resolution
         w = (x1 - x0) / resolution
         h = (y1 - y0) / resolution
-        buffer += ' '.join(['0', str(x), str(y), str(w), str(h)])
+        id = crater_ids[i]
+        if crater_id_to_file:
+            buffer += ' '.join(['0', str(x), str(y), str(w), str(h), id])
+        else:
+            buffer += ' '.join(['0', str(x), str(y), str(w), str(h)])
         buffer += '\n'
     f = open(dataset_path + 'revised_labels/' + img_names[img_idx] + '.txt', 'w')
     f.write(buffer)
@@ -125,6 +133,7 @@ def show_next():
     global img_file
     global selected_box_idx
     global color_list
+    global crater_ids
 
     img_idx += 1
     if img_idx == len(img_names):
@@ -145,7 +154,7 @@ def show_next():
     # read labels
     try:
         label_file = open(dataset_path + 'labels/' + img_name + '.txt', 'r')
-        label_list = [[float(item) for item in line.split(' ')] for i, line in enumerate(label_file.read().splitlines())]
+        label_list = [line.split(' ') for line in label_file.read().splitlines()]
         label_file.close()
         # sort boxes, from top to bottom
         label_list.sort(key=(lambda label : label[2]))
@@ -161,20 +170,28 @@ def show_next():
     # delete color list
     color_list = []
 
+    # delete crater ids of last image
+    crater_ids = []
+
     # draw rectangles
     for i, label in enumerate(label_list):
-        x, y, w, h = label[1:]
-        x *= resolution
-        y *= resolution
-        w *= resolution
-        h *= resolution
+        x = resolution * float(label[1])
+        y = resolution * float(label[2])
+        w = resolution * float(label[3])
+        h = resolution * float(label[4])
+        try:
+            id = label[5]
+        except:
+            id = ''
+
+        crater_ids.append(id)
         # get a color
         color = get_random_color()
         # create rectangles
         rect = canvas.create_rectangle(x - w / 2, y - h / 2, x + w / 2, y + h / 2, outline=color)
         rect_list.append(rect)
         # create radio buttons
-        radio_button = tk.Radiobutton(radio_frame, text='Box ' + str(i), variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=8)
+        radio_button = tk.Radiobutton(radio_frame, text=id, variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=12)
         # radio_button.pack()
         radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
         radio_list.append(radio_button)
@@ -190,15 +207,16 @@ hint = \
         'press W, A, S, D to move %d pixel\n'%big_move + \
         '3. Adjust a box: press ⬆️⬇️⬅️➡️\t\t\t\n' + \
         '4. Create a box: shift+leftmouse or rightmouse\t\n' + \
-        '5. Delete a box: press backspace or delete\t\n' + \
+        '5. Delete a box: press shift+backspace\delete\t\n' + \
         '6. Save and show next image: return or enter\t\n' + \
         '7. Last or next image without save: [ or ]\t\n' + \
-        '8. Delete this image from dataset: esc\t\t\n'
+        '8. Delete this image from dataset: shift+esc\t\n'
 hint_label = tk.Label(list_frame, text=hint, font=font)
 hint_label.pack()
 
 radio_frame = tk.Frame(list_frame)
 radio_frame.pack()
+# radio button var
 radio_idx = tk.StringVar()
 
 show_next()
@@ -215,6 +233,7 @@ def keypress(event):
     global rect_list
     global radio_list
     global radio_idx
+    global crater_ids
     if key in move_keyset:
         if selected_box_idx == -1:
             return
@@ -255,35 +274,51 @@ def keypress(event):
         selected_box_idx += 1
         selected_box_idx %= len(rect_list)
         radio_list[selected_box_idx].select()
-        flash_selected_rect()
-    elif key in ('BackSpace', 'Delete'):
-        if selected_box_idx == -1:
-            return
-        # delete rectangle
-        rect = rect_list[selected_box_idx]
-        canvas.delete(rect)
-        rect_list.remove(rect)
-        # delete color
-        del(color_list[selected_box_idx])
-        # delete radio button
-        for radio in radio_list:
-            radio.destroy()
-        radio_list = []
-        radio_idx.set('')
-        for i, rect in enumerate(rect_list):
-            radio_button = tk.Radiobutton(radio_frame, text='Box ' + str(i), variable=radio_idx, value=i, command=radio_select, font=font, bg=color_list[i], width=8)
-            # radio_button.pack(
-            radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
-            radio_list.append(radio_button)
-        selected_box_idx = -1
-    elif key == 'Escape':
-        os.system(mv_cmd + ' ' + dataset_path + 'images/' + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
-        print('move ' + img_names[img_idx] + ' to /deleted_images/')
-        show_next()
+        flash_selected_rect()        
     elif key == 'p':
         print(selected_box_idx)
         print('select box coords: ', canvas.coords(rect_list[selected_box_idx]))
 window.bind('<Key>', keypress)
+
+# delete a box
+def delete_box_by_keys(event):
+    global selected_box_idx
+    global radio_list
+    global crater_ids
+    global color_list
+    global radio_idx
+    if selected_box_idx == -1:
+        return
+    # delete rectangle
+    rect = rect_list[selected_box_idx]
+    canvas.delete(rect)
+    rect_list.remove(rect)
+    # delete color
+    del(color_list[selected_box_idx])
+    # delete crater id
+    del(crater_ids[selected_box_idx])
+    # delete radio button
+    for radio in radio_list:
+        radio.destroy()
+    radio_list = []
+    radio_idx.set('')
+    for i, rect in enumerate(rect_list):
+        radio_button = tk.Radiobutton(radio_frame, text=crater_ids[i], variable=radio_idx, value=i, command=radio_select, font=font, bg=color_list[i], width=12)
+        # radio_button.pack(
+        radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
+        radio_list.append(radio_button)
+    selected_box_idx = -1
+window.bind('<Shift-BackSpace>', delete_box_by_keys)
+window.bind('<Shift-Delete>', delete_box_by_keys)
+
+# delete image
+def delete_image_by_keys(event):
+    global img_names
+    global img_idx
+    os.system(mv_cmd + ' ' + dataset_path + 'images/' + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
+    print('move ' + img_names[img_idx] + ' to /deleted_images/')
+    show_next()
+window.bind('Shift-Escape', delete_image_by_keys)
 
 # click left mouse to select
 def select_box_by_mouse(event):
@@ -344,8 +379,9 @@ def on_click(event):
         i = len(rect_list)
         selected_box_idx = i
         rect_list.append(rect)
+        crater_ids.append('')
         # create new radio button
-        radio_button = tk.Radiobutton(radio_frame, text='Box ' + str(i), variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=8)
+        radio_button = tk.Radiobutton(radio_frame, text='', variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=12)
         # radio_button.pack()
         radio_button.grid(row=i%rows_per_col, column=i//rows_per_col)
         radio_list.append(radio_button)
