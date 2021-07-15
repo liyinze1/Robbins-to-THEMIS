@@ -318,7 +318,7 @@ def delete_image_by_keys(event):
     os.system(mv_cmd + ' ' + dataset_path + 'images/' + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
     print('move ' + img_names[img_idx] + ' to /deleted_images/')
     show_next()
-window.bind('Shift-Escape', delete_image_by_keys)
+window.bind('<Shift-Escape>', delete_image_by_keys)
 
 # click left mouse to select
 def select_box_by_mouse(event):
