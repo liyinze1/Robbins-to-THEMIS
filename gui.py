@@ -25,6 +25,11 @@ img_names = [name[:-4] for name in os.listdir(dataset_path + 'images')]
 done_work_names = set([name[:-4] for name in os.listdir(dataset_path + 'revised_labels')])
 img_names = [name for name in img_names if name not in done_work_names]
 
+# number of done labels
+done_work_num = len(done_work_names) + len(os.listdir(dataset_path + 'deleted_images'))
+# number of total labels
+total_work_num = len(os.listdir(dataset_path + 'labels'))
+
 resolution = 593
 color_list = []
 rect_list = []
@@ -77,9 +82,9 @@ def get_random_color():
     R = G = B = 0
     # avoid gray color
     while max(R, G, B) - min(R, G, B) < 50:
-        R = random.randint(20,255)
-        G = random.randint(20,255)
-        B = random.randint(20,255)
+        R = random.randint(80,255)
+        G = random.randint(80,255)
+        B = random.randint(80,255)
     color = '#' + '%02x'%R + '%02x'%G + '%02x'%B
     color_list.append(color)
     return color
@@ -172,6 +177,9 @@ def show_next():
 
     # delete crater ids of last image
     crater_ids = []
+
+    # show work progress
+    window.title('Let\'s correct lables!---%.2f%%'%((done_work_num + img_idx) / total_work_num * 100))
 
     # draw rectangles
     for i, label in enumerate(label_list):
