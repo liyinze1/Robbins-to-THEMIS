@@ -4,19 +4,24 @@ import os
 import random
 import platform
 
+
+if platform.system().lower() == 'windows':
+    slash = '\\'
+    mv_cmd = 'move'
+else:
+    slash = '/'
+    mv_cmd = 'mv'
+
+os.system('mkdir valid')
+os.system('mkdir valid' + slash + 'images')
+os.system('mkdir valid' + slash + 'labels')
+
 names = [name[: -4] for name in os.listdir('dataset/images/')]
 random.shuffle(names) 
 valid_size = int(len(names) * valid_ratio)
 
-if platform.system().lower() == 'windows':
-    os.system('move "valid/images\\*.*" "dataset/images/"')
-    os.system('move "valid/labels\\*.*" "dataset/labels/"')
-    for name in names[: valid_size]:
-        os.system('move "dataset/images\\%s.png" "valid/images/"' % name)
-        os.system('move "dataset/labels\\%s.txt" "valid/labels/"' % name)
-else:
-    os.system('mv "valid/images/*.*" "dataset/images/"')
-    os.system('mv "valid/labels/*.*" "dataset/labels/"')
-    for name in names[: valid_size]:
-        os.system('mv "dataset/images/%s.png" "valid/images/"' % name)
-        os.system('mv "dataset/labels/%s.txt" "valid/labels/"' % name)
+os.system('%s "valid/images%s*.*" "dataset/images/"' % (mv_cmd, slash))
+os.system('%s "valid/labels%s*.*" "dataset/labels/"' % (mv_cmd, slash))
+for name in names[: valid_size]:
+    os.system('%s "dataset/images%s%s.png" "valid/images/"' % (mv_cmd, slash, name))
+    os.system('%s "dataset/labels%s%s.txt" "valid/labels/"' % (mv_cmd, slash, name))
