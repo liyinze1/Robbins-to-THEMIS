@@ -30,6 +30,7 @@ done_work_num = len(done_work_names) + len(os.listdir(dataset_path + 'deleted_im
 # number of total labels
 total_work_num = len(os.listdir(dataset_path + 'labels'))
 
+box_scale = 1.1
 resolution = 593
 color_list = []
 rect_list = []
@@ -185,8 +186,8 @@ def show_next():
     for i, label in enumerate(label_list):
         x = resolution * float(label[1])
         y = resolution * float(label[2])
-        w = resolution * float(label[3])
-        h = resolution * float(label[4])
+        w = resolution * float(label[3]) * box_scale
+        h = resolution * float(label[4]) * box_scale
         try:
             id = label[5]
         except:
