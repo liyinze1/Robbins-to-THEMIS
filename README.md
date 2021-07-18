@@ -17,14 +17,7 @@ python main.py
 * Image folder: ./dataset/images/
 
 * Label folder: ./dataset/labels/
-## 3. Split dataset
-```
-python split.py
-```
-* Validation set folder: ./valid/
-
-* Default Train : Valid = 8 : 2
-## 4. Open the GUI tool for correct labels
+## 3. Open the GUI tool for correct labels
 ```
 python gui.py
 ```
@@ -32,3 +25,13 @@ python gui.py
 
 * Then the revised labels will be in ./dataset/revised_labels/
 
+## 4. Data augmentation
+```
+python augmentation.py
+```
+## 5. Split dataset
+```
+python split.py
+```
+
+* Default Train : Valid = 8 : 2
