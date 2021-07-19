@@ -24,12 +24,17 @@ python gui.py
 * The gui will read images from ./dataset/images/ and read labels from ./dataset/labels/ if labels exist. 
 
 * Then the revised labels will be in ./dataset/revised_labels/
-
-## 4. Data augmentation
+## 4. Clean abandoned labels and images
+```
+python clean.py
+```
+* The script will delete ./dataset/labels and ./dataset/deleted_images 
+* And rename ./dataset/revised_labels to ./dataset/labels
+## 5. Data augmentation
 ```
 python augmentation.py
 ```
-## 5. Split dataset
+## 6. Split dataset
 ```
 python split.py
 ```
