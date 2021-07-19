@@ -17,6 +17,7 @@ image_folder_path = 'dataset/images/'
 label_folder_path = 'dataset/labels/'
 
 inbox_threshold = 0.5
+box_scale = 1.2
 
 def slice_image(im_name):
     # read image to a ndarray
@@ -54,8 +55,8 @@ def slice_image(im_name):
             for lat_crater, lon_crater, w, h, id in zip(craters['LATITUDE_ELLIPSE_IMAGE'], craters['LONGITUDE_ELLIPSE_IMAGE'], craters['DIAM_ELLIPSE_MAJOR_IMAGE'], craters['DIAM_ELLIPSE_MINOR_IMAGE'], craters['CRATER_ID']):
                 x_ = lon_crater - lon
                 y_ = lat - lat_crater
-                w = w * 10 / round_resolution / cos(radians(lat))
-                h = h * 10 / round_resolution
+                w = w * 10 / round_resolution / cos(radians(lat)) * box_scale
+                h = h * 10 / round_resolution * box_scale
 
                 x0, y0 = max(0, x_ - w / 2), max(0, y_ - h / 2)
                 x1, y1 = min(1, x_ + w / 2), min(1, y_ + h / 2)
