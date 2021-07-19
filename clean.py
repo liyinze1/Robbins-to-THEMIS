@@ -1,7 +1,11 @@
 import os
-os.system('rm -f dataset/images/*')
-os.system('rm -f dataset/deleted_images/*')
-os.system('rm -f valid/images/*')
-os.system('rm -f dataset/labels/*')
-os.system('rm -f dataset/revised_labels/*')
-os.system('rm -f valid/labels/*')
+import platform
+
+if platform.system().lower() == 'windows':
+    os.system('rmdir /s dataset\\deleted_images')
+    os.system('rmdir /s dataset\\labels')
+    os.system('rename dataset\\revised_labels labels')
+else:
+    os.system('rm -rf dataset/deleted_images')
+    os.system('rm -rf dataset/labels')
+    os.system('mv dataset/revised_labels dataset/labels')
