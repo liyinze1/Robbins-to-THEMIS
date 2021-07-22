@@ -11,9 +11,11 @@ crater_id_to_file = True
 if platform.system().lower() == 'windows':
     dataset_path = 'dataset\\'
     mv_cmd = 'move'
+    slash = '\\'
 else:
     dataset_path = 'dataset/'
     mv_cmd = 'mv'
+    slash = '/'
 
 # create dir
 os.system('mkdir ' + dataset_path + 'revised_labels')
@@ -323,7 +325,7 @@ window.bind('<Shift-Delete>', delete_box_by_keys)
 def delete_image_by_keys(event):
     global img_names
     global img_idx
-    os.system(mv_cmd + ' ' + dataset_path + 'images/' + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
+    os.system(mv_cmd + ' ' + dataset_path + 'images' + slash + img_names[img_idx] + '.png ' + dataset_path + 'deleted_images')
     print('move ' + img_names[img_idx] + ' to /deleted_images/')
     show_next()
 window.bind('<Shift-Escape>', delete_image_by_keys)
