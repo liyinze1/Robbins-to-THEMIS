@@ -16,7 +16,7 @@ lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 image_folder_path = 'dataset/images/'
 label_folder_path = 'dataset/labels/'
 
-inbox_threshold = 0.5
+inbox_threshold = 0.2
 box_scale = 1.2
 
 def slice_image(im_name):
