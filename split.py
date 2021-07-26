@@ -8,12 +8,11 @@ dataset_path = 'dataset'
 valid_path = 'valid'
 
 if platform.system().lower() == 'windows':
-    slash = '\\'
     mv_cmd = 'move'
 else:
-    slash = '/'
     mv_cmd = 'mv'
 
+slash = os.sep
 os.system('mkdir ' + valid_path)
 os.system('mkdir ' + valid_path + slash + 'images')
 os.system('mkdir ' + valid_path + slash + 'labels')

@@ -2,8 +2,8 @@ from PIL import Image, ImageOps
 import os
 from tqdm import tqdm
 
-image_path = 'dataset/images/'
-label_path = 'dataset/revised_labels/'
+image_path = 'dataset/images/'.replace('/', os.sep)
+label_path = 'dataset/revised_labels/'.replace('/', os.sep)
 
 def mirror_or_flip_label(labels: str, key: str):
     res = ''

@@ -1,9 +1,7 @@
 import os
 import platform
 
-slash = '/'
-if platform.system().lower() == 'windows':
-    slash = '\\'
+slash = os.sep
 os.system('mkdir raw_images')
 os.system('mkdir dataset')
 os.system('mkdir dataset' + slash + 'images')

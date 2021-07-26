@@ -13,8 +13,8 @@ data = pd.read_csv('Robbins_essential.csv')
 lat_data = data['LATITUDE_CIRCLE_IMAGE']
 lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 
-image_folder_path = 'dataset/images/'
-label_folder_path = 'dataset/labels/'
+image_folder_path = 'dataset/images/'.replace('/', os.sep)
+label_folder_path = 'dataset/labels/'.replace('/', os.sep)
 
 inbox_threshold = 0.2
 box_scale = 1.2

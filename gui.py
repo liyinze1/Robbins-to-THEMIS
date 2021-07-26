@@ -9,14 +9,12 @@ crater_id_to_file = True
 
 # define file path
 if platform.system().lower() == 'windows':
-    dataset_path = 'dataset\\'
     mv_cmd = 'move'
-    slash = '\\'
 else:
-    dataset_path = 'dataset/'
     mv_cmd = 'mv'
-    slash = '/'
 
+slash = os.sep
+dataset_path = 'dataset' + slash
 # create dir
 os.system('mkdir ' + dataset_path + 'revised_labels')
 os.system('mkdir ' + dataset_path + 'deleted_images')
