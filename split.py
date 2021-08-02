@@ -17,7 +17,7 @@ os.system('mkdir ' + valid_path)
 os.system('mkdir ' + valid_path + slash + 'images')
 os.system('mkdir ' + valid_path + slash + 'labels')
 
-names = [name[: -4] for name in os.listdir('dataset/images/')]
+names = [name[: -4] for name in os.listdir(dataset_path + '/images/')]
 random.shuffle(names) 
 valid_size = int(len(names) * valid_ratio)
 

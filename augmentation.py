@@ -3,7 +3,7 @@ import os
 from tqdm import tqdm
 
 image_path = 'dataset/images/'.replace('/', os.sep)
-label_path = 'dataset/revised_labels/'.replace('/', os.sep)
+label_path = 'dataset/labels/'.replace('/', os.sep)
 
 def mirror_or_flip_label(labels: str, key: str):
     res = ''
@@ -19,7 +19,7 @@ def mirror_or_flip_label(labels: str, key: str):
     
 if __name__ == '__main__':
     # read image names
-    image_names = [name[:-4] for name in os.listdir(image_path) if 'v' not in name and 'h' not in name]
+    image_names = [name[:-4] for name in os.listdir(image_path) if 'v' not in name and 'h' not in name and name.endswith('png')]
 
     for image_name in tqdm(image_names):
         # original image and label
