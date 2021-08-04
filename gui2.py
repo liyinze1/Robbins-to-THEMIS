@@ -3,10 +3,11 @@ import tkinter as tk
 import os
 import random
 
-resolution = 593
-dataset_path = 'dataset/'
-yolo_label_path = 'detect/labels/'
+resolution = 416
+dataset_path = 'bendix/'
+yolo_label_path = dataset_path + 'yolo_labels/'
 
+conf_thresh = 0.5
 
 slash = os.sep
 dataset_path = dataset_path.replace('/', slash)
@@ -14,7 +15,15 @@ yolo_label_path = yolo_label_path.replace('/', slash)
 os.system('mkdir %srevised_labels' % dataset_path)
 
 # read images
-img_names = [name[:-4] for name in os.listdir(dataset_path + 'images')]
+try:
+    f = open(dataset_path + '/loss_rank.txt', 'r')
+    img_names = [line.split()[0] for line in f.read().splitlines()]
+    img_names = [img for img in img_names if img.split('.')[0][-1] not in ['h', 'v']]
+    img_format = 'png'
+    f.close()
+except:
+    img_names = [name[:-4] for name in os.listdir(dataset_path + 'images')]
+
 # remove done work from to-do list
 done_work_names = set([name[:-4] for name in os.listdir(dataset_path + 'revised_labels')])
 img_names = [name for name in img_names if name not in done_work_names]
@@ -251,6 +260,8 @@ def show_next():
             conf = label[5]
         except:
             conf = '1.0'
+        if float(conf) < conf_thresh:
+            continue
         if len(conf) > 3:
             conf = conf[:3]
         color = get_random_color()
@@ -281,7 +292,10 @@ def show_next():
     # show gt labels
     for label in gt_label_list:
         x1, y1, x2, y2 = xywh2xyxy(*label[1:5], dtype=round, scale=resolution)
-        id = label[5]
+        try:
+            id = label[5]
+        except:
+            id = ''
         gt_id_list.append(id)
         color = get_random_color()
 
