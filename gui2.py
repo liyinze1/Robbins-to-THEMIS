@@ -3,8 +3,8 @@ import tkinter as tk
 import os
 import random
 
-resolution = 416
-dataset_path = 'bendix/'
+resolution = 593
+dataset_path = 'combined_dataset/'
 yolo_label_path = dataset_path + 'yolo_labels/'
 
 conf_thresh = 0.5

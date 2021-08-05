@@ -1,11 +1,7 @@
 import os
-import platform
 
 slash = os.sep
 os.system('mkdir raw_images')
-os.system('mkdir dataset')
-os.system('mkdir dataset' + slash + 'images')
-os.system('mkdir dataset' + slash + 'labels')
 links = [
     'https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Eridania_DayIR_30Sept2017/THEMIS_DayIR_ControlledMosaic_Eridania_65S120E_100mpp.tif', \
     'https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Thaumasia_DayIR_30Sept2017/THEMIS_DayIR_ControlledMosaic_Thaumasia_65S240E_100mpp.tif', \

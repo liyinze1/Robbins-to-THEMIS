@@ -6,6 +6,11 @@ import os
 from tqdm import tqdm
 from math import cos, radians
 
+slash = os.sep
+os.system('mkdir dataset')
+os.system('mkdir dataset' + slash + 'images')
+os.system('mkdir dataset' + slash + 'labels')
+
 # define pixel per degree
 resolution = 592.747
 round_resolution = round(resolution)
@@ -47,7 +52,7 @@ def slice_image(im_name):
             lat = lat_base - i
             lon = lon_base + j
             file_name = str(lat) + '_' + str(lon)
-            pillow_im = Image.fromarray(im[round(x) : round(x) + round_resolution, round(y) : round(y) + round_resolution])
+            pillow_im = Image.fromarray(im[round(x) : round(x + round_resolution), round(y) : round(y + round_resolution)])
             
             # label
             craters = data[(lat_data <= lat) & (lat_data > lat - 1) & (lon_data >= lon) & (lon_data < lon + 1)]
