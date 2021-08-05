@@ -22,7 +22,7 @@ image_folder_path = 'dataset/images/'.replace('/', os.sep)
 label_folder_path = 'dataset/labels/'.replace('/', os.sep)
 
 inbox_threshold = 0.2
-box_scale = 1.2
+box_scale = 1.1
 
 def slice_image(im_name):
     # read image to a ndarray
