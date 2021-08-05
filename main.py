@@ -52,9 +52,9 @@ def slice_image(im_name):
             lat = lat_base - i
             lon = lon_base + j
             file_name = str(lat) + '_' + str(lon)
-            print(im.shape)
-            print(round(x), round(x + round_resolution), round(y), round(y + round_resolution))
-            pillow_im = Image.fromarray(im[round(x) : round(x + round_resolution), round(y) : round(y + round_resolution)])
+            round_x = int(round(x))
+            round_y = int(round(y))
+            pillow_im = Image.fromarray(im[round_x : round_x + round_resolution, round_y : round_y + round_resolution])
             
             # label
             craters = data[(lat_data <= lat) & (lat_data > lat - 1) & (lon_data >= lon) & (lon_data < lon + 1)]
