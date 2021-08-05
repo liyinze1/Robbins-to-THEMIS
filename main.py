@@ -53,6 +53,7 @@ def slice_image(im_name):
             lon = lon_base + j
             file_name = str(lat) + '_' + str(lon)
             print(im.shape)
+            print(round(x), round(x + round_resolution), round(y), round(y + round_resolution))
             pillow_im = Image.fromarray(im[round(x) : round(x + round_resolution), round(y) : round(y + round_resolution)])
             
             # label
