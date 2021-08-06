@@ -1,9 +1,9 @@
 from PIL import Image, ImageOps
 import os
 from tqdm import tqdm
+import argparse
 
-image_path = 'dataset/images/'.replace('/', os.sep)
-label_path = 'dataset/labels/'.replace('/', os.sep)
+
 
 def mirror_or_flip_label(labels: str, key: str):
     res = ''
@@ -18,6 +18,22 @@ def mirror_or_flip_label(labels: str, key: str):
     return res
     
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='dataset', help='path to dataset')
+    parser.add_argument('--clean', action='store_true', help='de augumentaion')
+    opt = parser.parse_args()
+
+    image_path = opt.dataset + os.sep + 'images' + os.sep
+    label_path = opt.dataset + os.sep + 'labels' + os.sep
+
+    if opt.clean:
+        os.system('rm -f ' + image_path + '*v.png')
+        os.system('rm -f ' + image_path + '*h.png')
+        os.system('rm -f ' + label_path + '*v.txt')
+        os.system('rm -f ' + label_path + '*h.txt')
+        exit()
+
     # read image names
     image_names = [name[:-4] for name in os.listdir(image_path) if 'v' not in name and 'h' not in name and name.endswith('png')]
 

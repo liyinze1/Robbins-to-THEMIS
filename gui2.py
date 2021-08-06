@@ -17,7 +17,8 @@ os.system('mkdir %srevised_labels' % dataset_path)
 # read images
 try:
     f = open(dataset_path + '/loss_rank.txt', 'r')
-    img_names = [line.split()[0] for line in f.read().splitlines()]
+    f.readline()
+    img_names = [line.split(',')[0] for line in f.read().splitlines()]
     img_names = [img for img in img_names if img.split('.')[0][-1] not in ['h', 'v']]
     img_format = 'png'
     f.close()
