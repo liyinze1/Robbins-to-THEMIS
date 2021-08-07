@@ -4,7 +4,7 @@ import os
 import random
 
 resolution = 593
-dataset_path = 'combined_dataset/'
+dataset_path = 'combined/'
 yolo_label_path = dataset_path + 'yolo_labels/'
 
 conf_thresh = 0.5
@@ -354,8 +354,5 @@ def keyboard_action(event):
         tk.Label(hint_window, text=hint, font=font).pack()
         hint_window.mainloop()
 window.bind('<Key>', keyboard_action)
-
-
-
 
 window.mainloop()
