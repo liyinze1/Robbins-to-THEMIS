@@ -4,4 +4,4 @@ pillow
 tqdm
 matplotlib
 tifffile
-opencv
+opencv-python
