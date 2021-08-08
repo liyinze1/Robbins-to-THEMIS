@@ -5,11 +5,18 @@ from PIL import Image
 import os
 from tqdm import tqdm
 from math import cos, radians
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset', type=str, default='dataset')
+opt = parser.parse_args()
+
+dataset_path = opt.dataset
 
 slash = os.sep
-os.system('mkdir dataset')
-os.system('mkdir dataset' + slash + 'images')
-os.system('mkdir dataset' + slash + 'labels')
+os.system('mkdir ' + dataset_path)
+os.system('mkdir ' + dataset_path + slash + 'images')
+os.system('mkdir ' + dataset_path + slash + 'labels')
 
 # define pixel per degree
 resolution = 592.747
@@ -18,8 +25,8 @@ data = pd.read_csv('Robbins_essential.csv')
 lat_data = data['LATITUDE_CIRCLE_IMAGE']
 lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 
-image_folder_path = 'dataset/images/'.replace('/', os.sep)
-label_folder_path = 'dataset/labels/'.replace('/', os.sep)
+image_folder_path = dataset_path + '/images/'.replace('/', os.sep)
+label_folder_path = dataset_path + '/labels/'.replace('/', os.sep)
 
 inbox_threshold = 0.2
 box_scale = 1.1

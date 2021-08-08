@@ -7,7 +7,7 @@ resolution = 593
 dataset_path = 'combined/'
 yolo_label_path = dataset_path + 'yolo_labels/'
 
-conf_thresh = 0.5
+conf_thresh = 0.1
 
 slash = os.sep
 dataset_path = dataset_path.replace('/', slash)
@@ -16,7 +16,7 @@ os.system('mkdir %srevised_labels' % dataset_path)
 
 # read images
 try:
-    f = open(dataset_path + '/loss_rank.txt', 'r')
+    f = open(dataset_path + '/loss_rank.csv', 'r')
     f.readline()
     img_names = [line.split(',')[0] for line in f.read().splitlines()]
     img_names = [img for img in img_names if img.split('.')[0][-1] not in ['h', 'v']]
