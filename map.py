@@ -9,9 +9,15 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default='dataset')
+parser.add_argument('--scale', type=float, default=1.0)
+parser.add_argument('--inbox-threshold', type=float, default=0.5)
 opt = parser.parse_args()
 
+print(opt)
+
 dataset_path = opt.dataset
+inbox_threshold = opt.inbox_threshold
+box_scale = opt.scale
 
 slash = os.sep
 os.system('mkdir ' + dataset_path)
@@ -28,8 +34,7 @@ lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 image_folder_path = dataset_path + '/images/'.replace('/', os.sep)
 label_folder_path = dataset_path + '/labels/'.replace('/', os.sep)
 
-inbox_threshold = 0.2
-box_scale = 1.1
+
 
 def slice_image(im_name):
     # read image to a ndarray

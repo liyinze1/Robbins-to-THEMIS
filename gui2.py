@@ -3,8 +3,8 @@ import tkinter as tk
 import os
 import random
 
-resolution = 593
-dataset_path = 'combined/'
+resolution = 416
+dataset_path = 'bendix/'
 yolo_label_path = dataset_path + 'yolo_labels/'
 
 conf_thresh = 0.1
@@ -18,9 +18,8 @@ os.system('mkdir %srevised_labels' % dataset_path)
 try:
     f = open(dataset_path + '/loss_rank.csv', 'r')
     f.readline()
-    img_names = [line.split(',')[0] for line in f.read().splitlines()]
+    img_names = [line.split(',')[0] for line in f.read().splitlines()][-356:]
     img_names = [img for img in img_names if img.split('.')[0][-1] not in ['h', 'v']]
-    img_format = 'png'
     f.close()
 except:
     img_names = [name[:-4] for name in os.listdir(dataset_path + 'images')]
