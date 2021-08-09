@@ -32,3 +32,4 @@ raw_images/
 .vscode/
 
 .DS_Store
+*.cache
