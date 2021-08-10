@@ -1,0 +1,295 @@
+import os
+import tkinter as tk
+import os
+import random
+from math import cos, radians
+
+resolution = 593
+img_path = '2e/images/'
+gt_label_path = '2e/labels/'
+yolo_label_path = '2e/0_labels/'
+revised_label_path = '2e/revised_labels/'
+
+conf_thresh = 0.2
+conf_thresh_up = 0.6
+iou_thresh = 0.5
+
+
+os.system('mkdir ' + revised_label_path)
+
+# read images
+img_names = [name[:-4] for name in os.listdir(img_path) if name[-5] not in ('h', 'v')]
+
+# remove done work from to-do list
+done_work_names = set([name[:-4] for name in os.listdir(revised_label_path)])
+img_names = [name for name in img_names if name not in done_work_names]
+
+# number of done labels
+done_work_num = len(done_work_names)
+# number of total labels
+total_work_num = len(img_names)
+
+font = ('Courier', 15)
+
+# create window
+window = tk.Tk()
+
+'''
+    code for yolo canvas on the left
+'''
+yolo_img_frame = tk.Frame(window, padx=10, pady=10)
+yolo_img_frame.pack(side='left')
+
+yolo_canvas = tk.Canvas(yolo_img_frame, bg='lightgray', height=resolution, width=resolution, borderwidth=0, highlightthickness=0)
+yolo_canvas.pack()
+
+
+'''
+    code for check button of yolo
+'''
+yolo_button_frame = tk.Frame(window, padx=10, pady=10)
+yolo_button_frame.pack(side='left')
+
+
+def get_random_color():
+    global color_list
+    R = G = B = 0
+    # avoid gray color
+    while max(R, G, B) - min(R, G, B) < 100:
+        R = random.randint(60,255)
+        G = random.randint(60,255)
+        B = random.randint(60,255)
+    color = '#' + '%02x'%R + '%02x'%G + '%02x'%B
+    return color
+
+def xyxy2xywh(x1, y1, x2, y2, dtype=float, scale=1):
+    x1, y1, x2, y2 = float(x1) * scale, float(y1) * scale, float(x2) * scale, float(y2) * scale
+    return dtype((x1 + x2) / 2), dtype((y1 + y2) / 2), dtype(abs(x2 - x1)), dtype(abs(y2 - y1))
+
+def xywh2xyxy(x, y, w, h, dtype=float, scale=1):
+    x, y, w, h = float(x) * scale, float(y) * scale, float(w) * scale, float(h) * scale
+    return dtype(x - w / 2), dtype(y - h / 2), dtype(x + w / 2), dtype(y + h / 2)
+
+'''
+    def some list to contain rects and buttons
+'''
+yolo_button_list = []
+yolo_rect_list = []
+yolo_button_var_list = []
+
+def yolo_button_action():
+    for i, button_var in enumerate(yolo_button_var_list):
+        if button_var.get():
+            yolo_canvas.itemconfigure(yolo_rect_list[i], state='normal')
+        else:
+            yolo_canvas.itemconfigure(yolo_rect_list[i], state='hidden')
+
+# calculate area of a box
+def area(x1, y1, x2, y2):
+    return (x2 - x1) * (y2 - y1)
+
+# calculate iou of two boxes
+def iou(box1, box2):
+    '''
+    box1 = [x1, y1, x2, y2]
+    box2 = [x1, y1, x2, y2]
+    '''
+    # calculate intersection
+    x1 = max(box1[0], box2[0])
+    y1 = max(box1[1], box2[1])
+    x2 = min(box1[2], box2[2])
+    y2 = min(box1[3], box2[3])
+
+    # no overlap
+    if x1 > x2 or y1 > y2:
+        return 0.
+    
+    intersection_area = area(x1, y1, x2, y2)
+    union_area = area(*box1) + area(*box2) - intersection_area
+    
+    return intersection_area / union_area
+
+
+def average_two_box(box1, box2):
+    return [(n + m) / 2 for n, m in zip(box1, box2)]
+
+
+label_list = []
+img_idx_stack = []
+
+# save labels to file 
+def save_label():
+    global label_list
+    for var,rect in zip(yolo_button_var_list, yolo_rect_list):
+        if var.get():
+            box = yolo_canvas.coords(rect)
+            label_list.append(box)
+
+    f = open(revised_label_path + img_names[img_idx] + '.txt', 'w')
+    for box in label_list:
+        label = ['0', *xyxy2xywh(*box, dtype=str, scale=1/resolution)]
+        f.write(' '.join(label) + '\n')
+    f.close()
+    print('Write %d'%len(label_list) + ' labels to ' + img_names[img_idx] + '.txt')
+
+# find box with best iou
+def find_max_iou_box(box, box_list):
+    '''
+    box = [x1, x2, x3, x4]
+    box_list = [box1, box2, ...]
+    '''
+    if len(box_list) == 0:
+        return 0, None
+
+    max_iou = 0
+    max_iou_box = None
+
+    for candi in box_list:
+        this_iou = iou(box, candi)
+        if this_iou > max_iou:
+            max_iou = this_iou
+            max_iou_box = candi
+    
+    return max_iou, max_iou_box
+
+img_idx = -1
+# show next image
+def show_next():
+    global yolo_button_list
+    global yolo_button_var_list
+    global yolo_rect_list
+
+    global img_names
+    global img_idx
+
+    global img_file
+    global yolo_img
+
+    global label_list
+
+    # clear canvas
+    yolo_canvas.delete('all')
+
+    # clear button
+    for button in yolo_button_list:
+        button.destroy()
+
+    # clear lists
+    yolo_button_list = []
+    yolo_button_var_list = []
+    yolo_rect_list = []
+    label_list = []
+
+    # get next img
+    img_idx += 1
+    if img_idx == len(img_names):
+        exit()
+    img_name = img_names[img_idx]
+
+    lat = int(img_name.split('_')[0])
+
+    # show progress on title
+    window.title(' ' + img_name + '.png   %d/%d'%((done_work_num + img_idx), total_work_num))
+
+    # read image & show image on two canvas
+    img_file = tk.PhotoImage(file=(img_path + img_name + '.png'))
+    yolo_img = yolo_canvas.create_image(0, 0, anchor='nw', image=img_file)
+
+    # read gt labels
+    try:
+        gt_label_file = open(gt_label_path + img_name + '.txt', 'r')
+        gt_label_list = [xywh2xyxy(line.split(' ')[1:5], dtype=round, scale=resolution)  for line in gt_label_file.read().splitlines()]
+        gt_label_file.close()
+    except:
+        gt_label_list = []
+
+    # read yolo labels
+    try:
+        yolo_label_file = open(yolo_label_path + img_name + '.txt', 'r')
+        yolo_label_list = [line.split(' ') for line in yolo_label_file.read().splitlines()]
+        yolo_label_file.close()
+        yolo_label_list.sort(key=(lambda label : -float(label[5])))
+    except:
+        yolo_label_list = []
+    
+    # show yolo labels
+    for label in yolo_label_list:
+        x, y, w, h = label[1:5]
+        x1, y1, x2, y2 = xywh2xyxy(x, y, w, h, dtype=round, scale=resolution)
+        conf = float(label[5][:5])
+
+        w_true = float(w) * cos(radians(lat))
+        h_true = float(h)
+
+        # if it's a partial crater, ignore it
+        if (max(w_true, h_true) / min(w_true, h_true) > 2 and max(w_true, h_true) < 30) or conf < conf_thresh:
+            continue
+
+        # find most relevant crater from ground truth dataset
+        max_iou, max_iou_box = find_max_iou_box((x1, y1, x2, y2), gt_label_list)
+            
+        # if there is a crater, then select the average one
+        if max_iou > iou_thresh:
+            gt_label_list.remove(max_iou_box)
+            label_list.append(average_two_box((x1, y1, x2, y2), max_iou_box))
+            continue
+
+        # if there is not a crater in gt dataset,
+        # and the confidence is good,
+        # add it to dataset directly
+        if conf > conf_thresh_up:
+            label_list.append((x1, y1, x2, y2))
+            continue
+
+        color = get_random_color()
+        # create rect
+        rect = yolo_canvas.create_rectangle(x1, y1, x2, y2, outline=color)
+        yolo_rect_list.append(rect)
+
+        # create button
+        button_var = tk.IntVar(value=1)
+        yolo_button_var_list.append(button_var)
+
+        button = tk.Checkbutton(yolo_button_frame, text=conf, variable=button_var, font=font, bg=color, width=10, command=yolo_button_action)
+        button.pack()
+        yolo_button_list.append(button)
+
+    for gt_label in gt_label_list:
+        label_list.append(gt_label)
+
+    if len(yolo_rect_list) == 0:
+        save_label()
+        show_next()
+    else:
+        img_idx_stack.append(img_idx)
+
+'''
+    action function
+'''
+def keyboard_action(event):
+    key = event.keysym
+    if key == 'Return':
+        save_label()
+        show_next()
+    elif key == '1':
+        for button_var in yolo_button_var_list:
+            button_var.set(1)
+        yolo_button_action()
+    elif key == '2':
+        for button_var in yolo_button_var_list:
+            button_var.set(0)
+        yolo_button_action()
+    elif key == 'bracketleft':
+        global img_idx_stack
+        global img_idx
+        if len(img_idx_stack) >= 2:
+            img_idx_stack.pop()
+            img_idx = img_idx_stack.pop() - 1
+            show_next()
+    elif key == 'bracketright':
+        show_next()
+window.bind('<Key>', keyboard_action)
+
+show_next()
+
+window.mainloop()

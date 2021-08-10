@@ -4,16 +4,15 @@ from tqdm import tqdm
 import argparse
 
 
-
 def mirror_or_flip_label(labels: str, key: str):
     res = ''
     for label in labels.splitlines():
-        c, x, y, w, h, id = label.split(' ')
+        c, x, y, w, h = label.split(' ')
         if key == 'h':
             x = str(1 - float(x))
         elif key == 'v':
-            y = str(1 - float(y))
-        res += ' '.join((c, x, y, w, h, id))
+            y = str(1 - float(y))      
+        res += ' '.join((c, x, y, w, h))
         res += '\n'
     return res
     
