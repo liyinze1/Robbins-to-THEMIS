@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default='dataset')
 parser.add_argument('--scale', type=float, default=1.0)
 parser.add_argument('--inbox-threshold', type=float, default=0.5)
+parser.add_argument('--no-label', action='store_true')
 opt = parser.parse_args()
 
 print(opt)
@@ -18,6 +19,7 @@ print(opt)
 dataset_path = opt.dataset
 inbox_threshold = opt.inbox_threshold
 box_scale = opt.scale
+no_label = opt.no_label
 
 slash = os.sep
 os.system('mkdir ' + dataset_path)
@@ -68,6 +70,10 @@ def slice_image(im_name):
             round_y = int(round(y))
             pillow_im = Image.fromarray(im[round_x : round_x + round_resolution, round_y : round_y + round_resolution])
             
+            if no_label:
+                pillow_im.save(image_folder_path + file_name + '.png', 'PNG')
+                continue
+
             # label
             craters = data[(lat_data <= lat) & (lat_data > lat - 1) & (lon_data >= lon) & (lon_data < lon + 1)]
             buffer = ''

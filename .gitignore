@@ -33,3 +33,5 @@ raw_images/
 
 .DS_Store
 *.cache
+
+dataset/
