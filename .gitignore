@@ -35,3 +35,5 @@ raw_images/
 *.cache
 
 dataset/
+
+distribution/

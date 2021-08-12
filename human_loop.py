@@ -6,12 +6,12 @@ from math import cos, radians
 
 resolution = 593
 img_path = '2e/images/'
-gt_label_path = '2e/labels/'
-yolo_label_path = '2e/0_labels/'
+gt_label_path = '2e/'
+yolo_label_path = '2e/yolo_labels/'
 revised_label_path = '2e/revised_labels/'
 
 conf_thresh = 0.2
-conf_thresh_up = 0.6
+conf_thresh_up = 0.9
 iou_thresh = 0.5
 
 
@@ -227,7 +227,7 @@ def show_next():
 
         # find most relevant crater from ground truth dataset
         max_iou, max_iou_box = find_max_iou_box((x1, y1, x2, y2), gt_label_list)
-            
+        
         # if there is a crater, then select the average one
         if max_iou > iou_thresh:
             gt_label_list.remove(max_iou_box)
