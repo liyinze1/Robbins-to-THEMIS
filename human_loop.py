@@ -6,12 +6,12 @@ from math import cos, radians
 
 resolution = 593
 img_path = '2e/images/'
-gt_label_path = '2e/'
-yolo_label_path = '2e/yolo_labels/'
+gt_label_path = ''
+yolo_label_path = '2e/0_labels_20/'
 revised_label_path = '2e/revised_labels/'
 
-conf_thresh = 0.2
-conf_thresh_up = 0.9
+conf_thresh = 0.5
+conf_thresh_up = 1
 iou_thresh = 0.5
 
 
@@ -289,6 +289,47 @@ def keyboard_action(event):
     elif key == 'bracketright':
         show_next()
 window.bind('<Key>', keyboard_action)
+
+
+selected_box_idx = -1
+# click left mouse to select
+def select_box_by_mouse(event):
+    global selected_box_idx
+    if event.widget == yolo_canvas:
+        global x_move_from
+        global y_move_from
+        x = event.x
+        y = event.y
+        x_move_from = x
+        y_move_from = y
+        print(x, y)
+        global selected_box_idx
+        candidate = -1
+        candidate_area = resolution * resolution
+        for i, rect in enumerate(yolo_rect_list):
+            x0, y0, x1, y1 = yolo_canvas.coords(rect)
+            area = (x1 - x0) * (y1 - y0)
+            if x0 < x < x1 and y0 < y < y1 and area < candidate_area:
+                candidate = i
+                candidate_area = area
+
+        selected_box_idx = candidate
+        
+window.bind('<Button-1>', select_box_by_mouse)
+
+# drag and move a box
+def on_drag(event):
+    global selected_box_idx
+    if event.widget == yolo_canvas and selected_box_idx >= 0:
+        rect = yolo_rect_list[selected_box_idx]
+        x0, y0, x1, y1 = yolo_canvas.coords(rect)
+        w = x1 - x0
+        h = y1 - y0
+        x = max(min(event.x, resolution), w)
+        y = max(min(event.y, resolution), h)
+        yolo_canvas.coords(rect, x - w, y - h, x, y)
+window.bind('<B1-Motion>', on_drag)
+
 
 show_next()
 
