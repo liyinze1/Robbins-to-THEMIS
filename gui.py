@@ -14,7 +14,7 @@ else:
     mv_cmd = 'mv'
 
 slash = os.sep
-dataset_path = 'dataset/' + slash
+dataset_path = '2e' + slash
 # create dir
 os.system('mkdir ' + dataset_path + 'revised_labels')
 os.system('mkdir ' + dataset_path + 'deleted_images')

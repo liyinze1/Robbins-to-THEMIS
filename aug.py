@@ -6,13 +6,22 @@ import argparse
 
 def mirror_or_flip_label(labels: str, key: str):
     res = ''
+    global need_id
     for label in labels.splitlines():
-        c, x, y, w, h = label.split(' ')
+        if need_id:
+            c, x, y, w, h, id = label.split(' ')
+        else:
+            c, x, y, w, h = label.split(' ')[:5]
+        
         if key == 'h':
             x = str(1 - float(x))
         elif key == 'v':
-            y = str(1 - float(y))      
-        res += ' '.join((c, x, y, w, h))
+            y = str(1 - float(y))
+
+        if need_id:
+            res += ' '.join((c, x, y, w, h, id))
+        else:
+            res += ' '.join((c, x, y, w, h))
         res += '\n'
     return res
     
@@ -23,6 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('--clean', action='store_true', help='de augumentaion')
     parser.add_argument('--no-label', action='store_true')
     parser.add_argument('--no-image', action='store_true')
+    parser.add_argument('--id', action='store_true')
     opt = parser.parse_args()
 
     image_path = opt.dataset + os.sep + 'images' + os.sep
@@ -35,8 +45,10 @@ if __name__ == '__main__':
         os.system('rm -f ' + label_path + '*h.txt')
         exit()
 
+    global need_id
     no_image = opt.no_image
     no_label = opt.no_label
+    need_id = opt.id
 
     if no_image and no_label:
         exit()

@@ -6,11 +6,11 @@ from math import cos, radians
 
 resolution = 593
 img_path = '2e/images/'
-gt_label_path = ''
-yolo_label_path = '2e/0_labels_20/'
+gt_label_path = '2e/10_14_labels/'
+yolo_label_path = '2e/15_labels/'
 revised_label_path = '2e/revised_labels/'
 
-conf_thresh = 0.5
+conf_thresh = 0.4
 conf_thresh_up = 1
 iou_thresh = 0.5
 
@@ -23,6 +23,7 @@ img_names = [name[:-4] for name in os.listdir(img_path) if name[-5] not in ('h',
 # remove done work from to-do list
 done_work_names = set([name[:-4] for name in os.listdir(revised_label_path)])
 img_names = [name for name in img_names if name not in done_work_names]
+
 
 # number of done labels
 done_work_num = len(done_work_names)
@@ -122,8 +123,12 @@ def save_label():
     global label_list
     for var,rect in zip(yolo_button_var_list, yolo_rect_list):
         if var.get():
-            box = yolo_canvas.coords(rect)
-            label_list.append(box)
+            x1, y1, x2, y2 = yolo_canvas.coords(rect)
+            x1 = max(min(x1, resolution), 0)
+            y1 = max(min(y1, resolution), 0)
+            x2 = max(min(x2, resolution), 0)
+            y2 = max(min(y2, resolution), 0)
+            label_list.append((x1, y1, x2, y2))
 
     f = open(revised_label_path + img_names[img_idx] + '.txt', 'w')
     for box in label_list:
@@ -189,7 +194,7 @@ def show_next():
     lat = int(img_name.split('_')[0])
 
     # show progress on title
-    window.title(' ' + img_name + '.png   %d/%d'%((done_work_num + img_idx), total_work_num))
+    window.title(' ' + img_name + '.png   %d/%d'%((done_work_num + img_idx), (done_work_num + total_work_num)))
 
     # read image & show image on two canvas
     img_file = tk.PhotoImage(file=(img_path + img_name + '.png'))
@@ -198,10 +203,12 @@ def show_next():
     # read gt labels
     try:
         gt_label_file = open(gt_label_path + img_name + '.txt', 'r')
-        gt_label_list = [xywh2xyxy(line.split(' ')[1:5], dtype=round, scale=resolution)  for line in gt_label_file.read().splitlines()]
+        gt_label_list = [xywh2xyxy(*line.split()[1:5], dtype=round, scale=resolution)  for line in gt_label_file.read().splitlines()]
         gt_label_file.close()
-    except:
+    except Exception as inst:
+        print(inst)    
         gt_label_list = []
+
 
     # read yolo labels
     try:
@@ -216,13 +223,16 @@ def show_next():
     for label in yolo_label_list:
         x, y, w, h = label[1:5]
         x1, y1, x2, y2 = xywh2xyxy(x, y, w, h, dtype=round, scale=resolution)
-        conf = float(label[5][:5])
+        try:
+            conf = float(label[5][:5])
+        except:
+            conf = 1
 
         w_true = float(w) * cos(radians(lat))
         h_true = float(h)
 
         # if it's a partial crater, ignore it
-        if (max(w_true, h_true) / min(w_true, h_true) > 2 and max(w_true, h_true) < 30) or conf < conf_thresh:
+        if (max(w_true, h_true) / min(w_true, h_true) > 2) or conf < conf_thresh:
             continue
 
         # find most relevant crater from ground truth dataset
@@ -232,7 +242,11 @@ def show_next():
         if max_iou > iou_thresh:
             gt_label_list.remove(max_iou_box)
             label_list.append(average_two_box((x1, y1, x2, y2), max_iou_box))
+            # label_list.append((x1, y1, x2, y2))
             continue
+
+
+        # continue
 
         # if there is not a crater in gt dataset,
         # and the confidence is good,
@@ -254,8 +268,13 @@ def show_next():
         button.pack()
         yolo_button_list.append(button)
 
+    print('deteted and already in gt:', len(label_list))
+
     for gt_label in gt_label_list:
         label_list.append(gt_label)
+
+    print('total not shown:', len(label_list))
+    
 
     if len(yolo_rect_list) == 0:
         save_label()
@@ -325,12 +344,16 @@ def on_drag(event):
         x0, y0, x1, y1 = yolo_canvas.coords(rect)
         w = x1 - x0
         h = y1 - y0
-        x = max(min(event.x, resolution), w)
-        y = max(min(event.y, resolution), h)
+        # x = max(min(event.x, resolution), w)
+        # y = max(min(event.y, resolution), h)
+        x = event.x
+        y = event.y
         yolo_canvas.coords(rect, x - w, y - h, x, y)
 window.bind('<B1-Motion>', on_drag)
 
+# while img_idx < len(img_names) + 1:
+#     show_next()
+#     save_label()
 
 show_next()
-
 window.mainloop()
