@@ -37,3 +37,5 @@ raw_images/
 dataset/
 
 distribution/
+
+*.zip
