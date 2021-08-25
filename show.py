@@ -5,7 +5,6 @@ import cv2
 from PIL import Image, ImageTk
 import argparse
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default='dataset')
 parser.add_argument('--shuffle', action='store_true')
