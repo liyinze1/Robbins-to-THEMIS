@@ -48,6 +48,7 @@ Arguments:
 * --valid validation set ratio, default = 0.2
 * --test test set ratio, default = 0.0
 * --prefix prefix path of image files, default = ../Robbins-to-THEMIS/dataset
+
 Output:
 * train.txt
 * valid.txt if valid ratio > 0
