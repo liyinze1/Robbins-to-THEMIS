@@ -1,8 +1,9 @@
-
+*
 !*.ipynb
 !.gitignore
 !*.sh
 !*.py
 !Robbins_essential.csv
 !requirements.txt
-*
+!README.md
+
