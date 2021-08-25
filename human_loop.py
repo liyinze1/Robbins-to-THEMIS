@@ -6,11 +6,16 @@ from math import cos, radians
 
 resolution = 593
 img_path = '2e/images/'
-gt_label_path = '2e/10_14_labels/'
-yolo_label_path = '2e/15_labels/'
+gt_label_image_path = '2e/label_image/'
+
+gt_label_path = '2e/0_4_labels/'
+yolo_label_path = '2e/5_labels/'
+robbins_label_path = '2e/gt_labels/'
+
 revised_label_path = '2e/revised_labels/'
 
-conf_thresh = 0.4
+
+conf_thresh = 0.5
 conf_thresh_up = 1
 iou_thresh = 0.5
 
@@ -50,6 +55,16 @@ yolo_canvas.pack()
 '''
 yolo_button_frame = tk.Frame(window, padx=10, pady=10)
 yolo_button_frame.pack(side='left')
+
+
+'''
+    code for right gt canvas
+'''
+gt_img_frame = tk.Frame(window, padx=10, pady=10)
+gt_img_frame.pack(side='left')
+
+gt_canvas = tk.Canvas(gt_img_frame, bg='lightgray', height=resolution, width=resolution, borderwidth=0, highlightthickness=0)
+gt_canvas.pack()
 
 
 def get_random_color():
@@ -130,6 +145,10 @@ def save_label():
             y2 = max(min(y2, resolution), 0)
             label_list.append((x1, y1, x2, y2))
 
+    if len(label_list) == 0:
+        print('no label in' + img_names[img_idx])
+        return
+
     f = open(revised_label_path + img_names[img_idx] + '.txt', 'w')
     for box in label_list:
         label = ['0', *xyxy2xywh(*box, dtype=str, scale=1/resolution)]
@@ -170,10 +189,14 @@ def show_next():
     global img_file
     global yolo_img
 
+    global gt_img
+    global gt_img_file
+
     global label_list
 
     # clear canvas
     yolo_canvas.delete('all')
+    gt_canvas.delete('all')
 
     # clear button
     for button in yolo_button_list:
@@ -200,6 +223,9 @@ def show_next():
     img_file = tk.PhotoImage(file=(img_path + img_name + '.png'))
     yolo_img = yolo_canvas.create_image(0, 0, anchor='nw', image=img_file)
 
+    gt_img_file = tk.PhotoImage(file=(gt_label_image_path + img_name + '.png'))
+    gt_img = gt_canvas.create_image(0, 0, anchor='nw', image=gt_img_file)
+
     # read gt labels
     try:
         gt_label_file = open(gt_label_path + img_name + '.txt', 'r')
@@ -209,6 +235,14 @@ def show_next():
         print(inst)    
         gt_label_list = []
 
+    # read robbins labels
+    try:
+        robbins_label_file = open(robbins_label_path + img_name + '.txt', 'r')
+        robbins_label_list = [xywh2xyxy(*line.split()[1:5], dtype=round, scale=resolution)  for line in robbins_label_file.read().splitlines()]
+        robbins_label_file.close()
+    except Exception as inst:
+        print(inst)    
+        robbins_label_list = []
 
     # read yolo labels
     try:
@@ -222,6 +256,7 @@ def show_next():
     # show yolo labels
     for label in yolo_label_list:
         x, y, w, h = label[1:5]
+        # h = float(h) * 0.9
         x1, y1, x2, y2 = xywh2xyxy(x, y, w, h, dtype=round, scale=resolution)
         try:
             conf = float(label[5][:5])
@@ -243,6 +278,13 @@ def show_next():
             gt_label_list.remove(max_iou_box)
             label_list.append(average_two_box((x1, y1, x2, y2), max_iou_box))
             # label_list.append((x1, y1, x2, y2))
+            continue
+
+        # if in robbins dataset
+        max_iou, max_iou_box = find_max_iou_box((x1, y1, x2, y2), robbins_label_list)
+        if max_iou > iou_thresh:
+            robbins_label_list.remove(max_iou_box)
+            label_list.append((x1, y1, x2, y2))
             continue
 
 
@@ -268,10 +310,9 @@ def show_next():
         button.pack()
         yolo_button_list.append(button)
 
-    print('deteted and already in gt:', len(label_list))
+    print('detected and already in gt:', len(label_list))
 
-    for gt_label in gt_label_list:
-        label_list.append(gt_label)
+    label_list += gt_label_list
 
     print('total not shown:', len(label_list))
     

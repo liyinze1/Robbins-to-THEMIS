@@ -29,7 +29,7 @@ os.system('mkdir ' + dataset_path + slash + 'labels')
 # define pixel per degree
 resolution = 592.747
 round_resolution = int(round(resolution))
-data = pd.read_csv('Robbins_essential.csv')
+data = pd.read_csv('Robbinsv2.csv')
 lat_data = data['LATITUDE_CIRCLE_IMAGE']
 lon_data = data['LONGITUDE_CIRCLE_IMAGE']
 
