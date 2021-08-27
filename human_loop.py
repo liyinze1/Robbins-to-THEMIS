@@ -288,8 +288,6 @@ def show_next():
             continue
 
 
-        # continue
-
         # if there is not a crater in gt dataset,
         # and the confidence is good,
         # add it to dataset directly
@@ -392,9 +390,6 @@ def on_drag(event):
         yolo_canvas.coords(rect, x - w, y - h, x, y)
 window.bind('<B1-Motion>', on_drag)
 
-# while img_idx < len(img_names) + 1:
-#     show_next()
-#     save_label()
 
 show_next()
 window.mainloop()

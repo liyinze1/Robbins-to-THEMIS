@@ -78,11 +78,15 @@ def slice_image(im_name):
             craters = data[(lat_data <= lat) & (lat_data > lat - 1) & (lon_data >= lon) & (lon_data < lon + 1)]
             buffer = ''
             for lat_crater, lon_crater, w, h, id in zip(craters['LATITUDE_ELLIPSE_IMAGE'], craters['LONGITUDE_ELLIPSE_IMAGE'], craters['DIAM_ELLIPSE_MAJOR_IMAGE'], craters['DIAM_ELLIPSE_MINOR_IMAGE'], craters['CRATER_ID']):
+                # calculate x and y position in a tile
                 x_ = lon_crater - lon
                 y_ = lat - lat_crater
+
+                # caculate w and h
                 w = w * 10 / round_resolution / cos(radians(lat)) * box_scale
                 h = h * 10 / round_resolution * box_scale
 
+                # deal with partial craters
                 x0, y0 = max(0, x_ - w / 2), max(0, y_ - h / 2)
                 x1, y1 = min(1, x_ + w / 2), min(1, y_ + h / 2)
 
@@ -96,13 +100,14 @@ def slice_image(im_name):
                     h = y1 - y0
                     buffer += ('0' + ' ' + str(x_) + ' ' + str(y_) + ' ' + str(w) + ' ' + str(h) + ' ' + id + '\n')
                 
-            
+            # if there is at least one crater in this tile, save this tile with image
             if len(buffer) > 0:
                 pillow_im.save(image_folder_path + file_name + '.png', 'PNG')
                 f = open(label_folder_path + file_name + '.txt', 'w')
                 f.write(buffer)
                 f.close()
 
+# get the section lat and lon from filename
 def get_lat_lon_base(file_name):
     latlon = file_name.split('_')[-2]
     if 'N' in latlon:
@@ -117,9 +122,9 @@ def get_lat_lon_base(file_name):
         lon -= 360
     return lat, lon
 
-if __name__ == '__main__':
-    raw_folder_path = 'raw_images/'
-    raw_ims = os.listdir(raw_folder_path)
-    for im_name in raw_ims:
-        slice_image(raw_folder_path + im_name)
-        # os.system('rm -f %s'%(raw_folder_path + im_name))
+
+raw_folder_path = 'raw_images/'
+raw_ims = os.listdir(raw_folder_path)
+for im_name in raw_ims:
+    slice_image(raw_folder_path + im_name)
+    # os.system('rm -f %s'%(raw_folder_path + im_name))
