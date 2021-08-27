@@ -29,6 +29,12 @@ python gui.py
 
 * Then the revised labels will be in ./dataset/revised_labels/
 
+After correction, run
+`
+python clean.py
+`
+will help to clean all the useless folder.
+
 ## 4. Data augmentation
 ```
 python aug.py
@@ -54,3 +60,12 @@ Output:
 * valid.txt if valid ratio > 0
 * test.txt if test ratio > 0
 * all.txt contains all the files
+## 6. Other tools
+```
+python show.py
+```
+This python script will show images with labels in a GUI.
+Arguments:
+* --dataset the/path/to/the/dataset/folder, default = ./dataset
+* --shuffle show images in a random order
+* --line the line width of labels, default = 1
