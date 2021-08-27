@@ -65,7 +65,16 @@ Output:
 python show.py
 ```
 This python script will show images with labels in a GUI.
+
 Arguments:
 * --dataset the/path/to/the/dataset/folder, default = ./dataset
 * --shuffle show images in a random order
 * --line the line width of labels, default = 1
+
+```
+python count.py
+```
+This script will output the number of images, the number of craters and the number of craters per image.
+
+Arguments:
+* --path the/path/to/the/labels/folder, default = ./dataset/labels
