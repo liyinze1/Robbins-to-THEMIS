@@ -3,6 +3,8 @@
 !.gitignore
 !*.sh
 !*.py
-!Robbins_essential.csv
+!Robbinsv2.csv
 !requirements.txt
 !README.md
+
+test.*
