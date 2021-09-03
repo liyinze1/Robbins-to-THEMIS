@@ -4,6 +4,7 @@ import random
 import threading
 import time
 import platform
+from utils import *
 
 crater_id_to_file = True
 
@@ -157,14 +158,8 @@ def show_next():
     selected_box_idx = -1
 
     # read labels
-    try:
-        label_file = open(dataset_path + 'labels/' + img_name + '.txt', 'r')
-        label_list = [line.split(' ') for line in label_file.read().splitlines()]
-        label_file.close()
-        # sort boxes, from top to bottom
-        label_list.sort(key=(lambda label : label[2]))
-    except:
-        label_list = []
+    label_list = read_labels(dataset_path + 'labels/' + img_name + '.txt', id=True, scale=resolution)
+    label_list.sort(key=(lambda label : label[1]))
     # delete radiobuttons of last image
     radio_idx = tk.StringVar()
     for radio_button in radio_list:
@@ -183,10 +178,6 @@ def show_next():
 
     # draw rectangles
     for i, label in enumerate(label_list):
-        x = resolution * float(label[1])
-        y = resolution * float(label[2])
-        w = resolution * float(label[3])
-        h = resolution * float(label[4])
         try:
             id = label[5]
         except:
@@ -196,7 +187,7 @@ def show_next():
         # get a color
         color = get_random_color()
         # create rectangles
-        rect = canvas.create_rectangle(x - w / 2, y - h / 2, x + w / 2, y + h / 2, outline=color)
+        rect = canvas.create_rectangle(*label[:4], outline=color)
         rect_list.append(rect)
         # create radio buttons
         radio_button = tk.Radiobutton(radio_frame, text=id, variable=radio_idx, value=i, command=radio_select, font=font, bg=color, width=12)
