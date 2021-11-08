@@ -7,7 +7,9 @@ parser.add_argument('-n', type=int, default=30, help='the number of images to do
     if you don\'t want images > 65°, please input n <= 16')
 opt = parser.parse_args()
 
-os.system('mkdir raw_images')
+if not os.path.isdir('raw_images'):
+    os.system('mkdir raw_images')
+
 links = [
     'https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Amenthes_DayIR_15April2016/THEMIS_DayIR_ControlledMosaic_Amenthes_000N090E_100mpp.tif', \
     'https://planetarymaps.usgs.gov/mosaic/Mars/THEMIS_controlled_mosaics/Memnonia_DayIR_15April2016/THEMIS_DayIR_ControlledMosaic_Memnonia_30S180E_100mpp.tif', \
@@ -42,4 +44,5 @@ links = [
 n = opt.n
 
 for link in links[:n]:
-    os.system('wget -P raw_images ' + link)
+    if not os.path.isfile('raw_images' + os.sep + link.split('/')[-1]):
+        os.system('wget -P raw_images ' + link)

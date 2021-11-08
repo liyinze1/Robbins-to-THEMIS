@@ -1,5 +1,6 @@
 import os
 import argparse
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--path', type=str, default='./dataset/labels')
@@ -13,7 +14,7 @@ names = [name for name in os.listdir(label_path) if name.endswith('txt')]
 size = len(names)
 count = 0
 
-for name in names:
+for name in tqdm(names):
     f = open(label_path + os.sep + name, 'r')
     count += len(f.read().splitlines())
     f.close()

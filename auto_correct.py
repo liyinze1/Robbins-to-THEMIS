@@ -2,13 +2,24 @@ import os
 from tqdm import tqdm
 import pandas as pd
 from utils import *
+import argparse
 
-gt_data_path = 'dataset/4_labels/'
-yolo_data_path = '../yolov5/runs/detect/global_5/labels/'
-result_path = gt_data_path.replace('labels', 'new_labels')
+parser = argparse.ArgumentParser()
+parser.add_argument('--gt', type=str, default='dataset/labels_0')
+parser.add_argument('--yolo', type=str, default='../yolov5/runs\detect\global1-v5m-1\labels')
+parser.add_argument('--result', type=str, default='dataset/labels_new')
+parser.add_argument('--iou', type=float, default=0.2)
+parser.add_argument('--conf', type=float, default=1)
+opt = parser.parse_args()
 
-iou_threshold = 0.2
-conf_threshold = 1
+print(opt)
+
+gt_data_path = opt.gt + '/'
+yolo_data_path = opt.yolo + '/'
+result_path = opt.result + '/'
+
+iou_threshold = opt.iou
+conf_threshold = opt.conf
 
 os.system('mkdir %s' % result_path.replace('/', os.sep))
 
@@ -48,4 +59,4 @@ for file_name in tqdm(file_list):
     f.close()
 
 count = pd.DataFrame({'iou': iou_list, 'conf': conf_list})
-count.to_csv('dataset/count.csv')
+count.to_csv(result_path + 'count.csv'.replace('/', os.sep))

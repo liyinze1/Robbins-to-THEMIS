@@ -1,5 +1,5 @@
-
 from os import error
+import math
 
 def average_two_box(box1, box2):
     return [(n + m) / 2 for n, m in zip(box1, box2)]
@@ -57,13 +57,13 @@ def find_max_iou_box(box, box_list):
     
     return max_iou, max_iou_box
 
-def read_labels(filename, scale=1, id=False, conf=False):
+def read_labels(filename, scale=1, dtype=float, id=False, conf=False):
     try:
         f = open(filename, 'r')
         if id:
             labels = []
             for line in f.read().splitlines():
-                label = list(xywh2xyxy(*line.split()[1: 5], scale=scale))
+                label = list(xywh2xyxy(*line.split()[1: 5], scale=scale, dtype=dtype))
                 if len(line.split()) == 6:
                     id = label.split()[5]
                 else:
@@ -71,12 +71,42 @@ def read_labels(filename, scale=1, id=False, conf=False):
                 label.append(id)
                 labels.append(label)
         elif conf:
-            labels = [list(xywh2xyxy(*label.split()[1: 5], scale=scale)) + [float(label.split()[5])] for label in f.read().splitlines()]
+            labels = [list(xywh2xyxy(*label.split()[1: 5], scale=scale, dtype=dtype)) + [float(label.split()[5])] for label in f.read().splitlines()]
         else:
-            labels = [xywh2xyxy(*label.split()[1: 5], scale=scale) for label in f.read().splitlines()]
+            labels = [xywh2xyxy(*label.split()[1: 5], scale=scale, dtype=dtype) for label in f.read().splitlines()]
         f.close()
-    except error:    
+    except:
+        # print(filename + 'not found')
         labels = []
-        print(error)
     
     return labels
+
+def read_loss_rank(filename, key='loss'):
+    f = open(filename, 'r')
+    head = f.readline()
+    cols = head.split(',')
+    assert key in cols
+    idx = cols.index(key)
+    rank = [entry.split(',') for entry in f.read().splitlines()]
+    rank.sort(key=lambda entry: float(entry[idx]), reverse=True)
+    f.close()
+
+    return head, rank
+
+def box_filter(boxes, size_range, w_scale, keep_boundary_box=True):
+    res = []
+    for box in boxes:
+        w = (box[2] - box[0]) * w_scale
+        h = box[3] - box[1]
+        if (0.5 < w / h < 2 or keep_boundary_box) and size_range[0] < max(w, h) < size_range[1]:
+            res.append(box)
+    
+    return res
+            
+def list_to_thread_list(origin_list: list, n: int)-> list:
+    n = min(n, len(origin_list))
+    size = math.ceil(len(origin_list) / n)
+    res = []
+    for i in range(n):
+        res.append(origin_list[i * size: min(len(origin_list), (i + 1) * size)])
+    return res
